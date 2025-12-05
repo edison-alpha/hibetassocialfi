@@ -1,0 +1,656 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Firefox */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 280 50% 8%;
+    --foreground: 0 0% 100%;
+
+    --card: 280 40% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 280 45% 10%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 75 100% 65%;
+    --primary-foreground: 280 50% 8%;
+
+    --secondary: 320 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 280 30% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 320 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 35%;
+    --input: 280 30% 20%;
+    --ring: 75 100% 65%;
+
+    --radius: 1rem;
+    
+    --gradient-hero: linear-gradient(135deg, hsl(280 60% 15%) 0%, hsl(320 70% 20%) 50%, hsl(280 50% 10%) 100%);
+    --gradient-glow: radial-gradient(circle at 50% 0%, hsl(320 90% 50% / 0.3) 0%, transparent 50%);
+    --shadow-glow: 0 0 60px hsl(320 90% 50% / 0.4);
+    --shadow-lime: 0 0 40px hsl(75 100% 65% / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 280 50% 8%;
+    --foreground: 0 0% 100%;
+
+    --card: 280 40% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 280 45% 10%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 75 100% 65%;
+    --primary-foreground: 280 50% 8%;
+
+    --secondary: 320 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 280 30% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 320 90% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 35%;
+    --input: 280 30% 20%;
+    --ring: 75 100% 65%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+  
+  /* Custom thin scrollbar for sidebar */
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Firefox scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  /* Twitter-style Like Animation */
+  @keyframes heart-burst {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes heart-pop {
+    0% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.3);
+    }
+    50% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .heart-burst {
+    animation: heart-burst 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .heart-pop {
+    animation: heart-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  /* Heart particles animation */
+  @keyframes particle-burst {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(var(--tx), var(--ty)) scale(0);
+      opacity: 0;
+    }
+  }
+  
+  .heart-particle {
+    position: absolute;
+    pointer-events: none;
+    animation: particle-burst 0.6s ease-out forwards;
+  }
+
+  /* Bookmark Animation (similar to heart) */
+  @keyframes bookmark-pop {
+    0% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.3);
+    }
+    50% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes bookmark-saved {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .bookmark-pop {
+    animation: bookmark-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .bookmark-saved {
+    animation: bookmark-saved 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .bookmark-particle {
+    position: absolute;
+    pointer-events: none;
+    animation: particle-burst 0.6s ease-out forwards;
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.5));
+  }
+  
+  .bookmark-particle svg {
+    display: block;
+  }
+}
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+  /* Thin scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: 10px;
+    transition: background 0.2s ease;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+
+  /* For Firefox */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.2) transparent;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Custom scrollbar for search modal and other components */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.3);
+    border-radius: 10px;
+    margin: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.6) 0%,
+      hsl(var(--muted) / 0.8) 100%
+    );
+    border-radius: 10px;
+    border: 2px solid hsl(var(--background));
+    transition: all 0.3s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary) / 0.8) 0%,
+      hsl(var(--muted)) 100%
+    );
+    border-width: 1px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--muted)) 100%
+    );
+  }
+
+  /* For Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.6) hsl(var(--muted) / 0.3);
+  }
+}
+
+/* Loop button animation */
+@keyframes loop-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.7;
+  }
+}
+
+.loop-active {
+  animation: loop-pulse 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Infinite scroll animation for album carousel */
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%); /* 1/3 of total width for seamless loop */
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 4.2s linear infinite; /* 3x faster - very fast scroll */
+}
+
+.animate-scroll-infinite:hover {
+  animation-play-state: paused;
+}
+
+/* Seamless infinite scroll - no jump */
+@keyframes scroll-seamless {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--scroll-width, -50%));
+  }
+}
+
+.animate-scroll-seamless {
+  animation: scroll-seamless 40s linear infinite;
+  will-change: transform;
+}
+
+.animate-scroll-seamless:hover {
+  animation-play-state: paused;
+}
+
+/* Responsive text utilities */
+@layer utilities {
+  .text-responsive-xs {
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+  }
+  
+  .text-responsive-sm {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+  
+  .text-responsive-base {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+  
+  .text-responsive-lg {
+    font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+  }
+  
+  .text-responsive-xl {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+  
+  .text-responsive-2xl {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+  
+  .text-responsive-3xl {
+    font-size: clamp(1.875rem, 6vw, 2.5rem);
+  }
+  
+  .text-responsive-4xl {
+    font-size: clamp(2.25rem, 7vw, 3rem);
+  }
+  
+  .text-responsive-5xl {
+    font-size: clamp(3rem, 8vw, 4rem);
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-specific touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch target size for mobile */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent double-tap zoom on buttons */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Better touch feedback */
+  button:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Prevent iOS Safari from pausing audio when scrolling */
+audio {
+  -webkit-playsinline: true;
+  playsinline: true;
+}
+
+/* Button corner fill animation */
+.group:hover .corner-fill-animation {
+  clip-path: polygon(0% 0, 100% 0, 100% 100%, 0% 100%) !important;
+}
+
+/* Genre badge corner fill animation */
+.group:hover > div[style*="clip-path"] {
+  clip-path: polygon(0% 0, 100% 0, 100% 100%, 0% 100%) !important;
+}
+
+/* Infinite Logo Scroll Animation */
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 15s linear infinite;
+}
+
+.animate-infinite-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* 3D Curved Album Scroll Styles */
+@layer utilities {
+  .perspective-container {
+    perspective: 1200px;
+    perspective-origin: center center;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  /* Curved scroll effect with wave motion */
+  @keyframes curved-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+  
+  .animate-curved-scroll {
+    animation: curved-scroll 40s linear infinite;
+  }
+  
+  .animate-curved-scroll:hover {
+    animation-play-state: paused;
+  }
+  
+  /* Album card 3D hover effect */
+  .album-card-3d {
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  .album-card-3d:hover {
+    transform: translateZ(30px) scale(1.05);
+  }
+  
+  /* Gradient radial utility */
+  .bg-gradient-radial {
+    background: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+  
+  /* Post button animations - Fast and smooth */
+  @keyframes slideUp {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+  }
+  
+  @keyframes slideUpFromBottom {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  /* Ultra smooth spinner animation - 60fps with GPU acceleration */
+  @keyframes smoothSpin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-slideUp {
+    animation: slideUp 0.2s ease-out forwards;
+  }
+  
+  .animate-slideUpFromBottom {
+    animation: slideUpFromBottom 0.2s ease-out forwards;
+  }
+  
+  /* Ultra smooth spinner - optimized for 60fps with GPU acceleration */
+  .animate-smooth-spin {
+    animation: smoothSpin 0.6s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    transform-origin: center center;
+    /* Force GPU acceleration and prevent jank */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent subpixel rendering issues */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  
+  /* Prevent animation conflicts and ensure smooth rendering */
+  .animate-smooth-spin * {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Disable transitions on button during posting to prevent conflicts */
+  .transition-none {
+    transition: none !important;
+  }
+  
+  /* Ultra fast spin animation - 0.4s (2.5x faster than default 1s) */
+  @keyframes fastSpin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-fast-spin {
+    animation: fastSpin 0.3s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+}
