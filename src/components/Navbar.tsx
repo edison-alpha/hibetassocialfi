@@ -142,7 +142,7 @@ const Navbar = ({ showCreateSongButton = true, hideBottomNav = false, hideOnMobi
           <div className="flex items-center h-14 sm:h-16">
             {/* Logo and Navigation */}
             <div className="flex items-center gap-4 md:gap-8">
-              <Link to="/" className="relative flex items-center">
+              <a href="https://www.hibeats.xyz/" className="relative flex items-center">
                 {/* Beta Badge - Glassmorphism */}
                 <span className="absolute -top-1 -right-6 sm:-right-7 bg-primary/10 backdrop-blur-sm border border-primary/30 text-primary text-[7px] sm:text-[8px] font-semibold px-1 py-[1px] rounded-full">
                   BETA
@@ -152,7 +152,7 @@ const Navbar = ({ showCreateSongButton = true, hideBottomNav = false, hideOnMobi
                   alt="HiBeats"
                   className="h-6 sm:h-7 md:h-8 w-auto"
                 />
-              </Link>
+              </a>
 
               {/* Navigation Menu */}
               <nav className="hidden md:flex items-center gap-6 ml-8">
