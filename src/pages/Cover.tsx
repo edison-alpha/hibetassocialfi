@@ -17,6 +17,7 @@ import { coverHistoryService } from "@/services/coverHistoryService";
 import type { CoverHistoryItem } from "@/services/coverHistoryService";
 import CoverHistory from "@/components/CoverHistory";
 import Navbar from "@/components/Navbar";
+import PasswordGate from "@/components/PasswordGate";
 
 interface StemTrack {
   name: string;
@@ -820,6 +821,12 @@ export default function Cover() {
   };
 
   return (
+    <PasswordGate
+      password="bayu4321"
+      storageKey="coverPageAuth"
+      title="Cover Studio Access"
+      description="Enter password to access Cover Studio"
+    >
     <div className="min-h-screen bg-black">
       <Navbar />
       
@@ -1483,5 +1490,6 @@ export default function Cover() {
         </div>
       </div>
     </div>
+    </PasswordGate>
   );
 }
