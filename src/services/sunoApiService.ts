@@ -80,7 +80,7 @@ interface UploadAndCoverRequest {
   customMode: boolean;
   instrumental: boolean;
   personaId?: string;
-  model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5";
+  model: "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V4_5ALL" | "V5";
   negativeTags?: string;
   vocalGender?: "m" | "f";
   styleWeight?: number;

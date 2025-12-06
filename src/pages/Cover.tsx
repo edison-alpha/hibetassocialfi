@@ -122,54 +122,61 @@ export default function Cover() {
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith("audio/")) {
-        toast.error("Please select an audio file");
-        return;
-      }
-      if (file.size > 50 * 1024 * 1024) { // 50MB limit
-        toast.error("File size must be less than 50MB");
-        return;
-      }
+    if (!file) return;
 
-      // Check audio duration
+    // Basic file type validation (more lenient for mobile)
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'audio/ogg', 'audio/m4a', 'audio/aac'];
+    const isValidType = validTypes.some(type => file.type === type) || 
+                        file.type.startsWith("audio/") ||
+                        file.name.match(/\.(mp3|wav|flac|ogg|m4a|aac)$/i);
+    
+    if (!isValidType) {
+      toast.error("Please select an audio file (MP3, WAV, FLAC, etc.)");
+      return;
+    }
+
+    // File size validation
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File size must be less than 50MB");
+      return;
+    }
+
+    // Set file immediately for better UX
+    setUploadedFile(file);
+    setUploadedUrl("");
+    setCoveredMusic(null);
+    localStorage.removeItem('coveredMusic');
+    setStems([]);
+    localStorage.removeItem('coverStems');
+
+    // Check audio duration (non-blocking, just warning)
+    try {
       const audio = document.createElement('audio');
       const objectUrl = URL.createObjectURL(file);
       audio.src = objectUrl;
       
-      await new Promise<void>((resolve, reject) => {
-        audio.addEventListener('loadedmetadata', () => {
-          const durationInMinutes = audio.duration / 60;
-          
-          // V4_5ALL model has 1 minute limit, others have 8 minutes
-          const maxDuration = coverSettings.model === 'V4_5ALL' ? 1 : 8;
-          
-          if (durationInMinutes > maxDuration) {
-            toast.error(`Audio duration must not exceed ${maxDuration} minute(s) for ${coverSettings.model} model`);
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error('Duration exceeded'));
-            return;
-          }
-          
-          URL.revokeObjectURL(objectUrl);
-          resolve();
-        });
+      audio.addEventListener('loadedmetadata', () => {
+        const durationInMinutes = audio.duration / 60;
+        const maxDuration = coverSettings.model === 'V4_5ALL' ? 1 : 8;
         
-        audio.addEventListener('error', () => {
-          URL.revokeObjectURL(objectUrl);
-          reject(new Error('Failed to load audio'));
-        });
-      }).catch((error) => {
-        console.error('Audio validation error:', error);
-        return;
+        if (durationInMinutes > maxDuration) {
+          toast.warning(`⚠️ Audio is ${durationInMinutes.toFixed(1)} minutes. Max recommended: ${maxDuration} minute(s) for ${coverSettings.model} model`);
+        } else {
+          toast.success(`File selected: ${file.name}`);
+        }
+        
+        URL.revokeObjectURL(objectUrl);
       });
-
-      setUploadedFile(file);
-      setUploadedUrl("");
-      setCoveredMusic(null);
-      localStorage.removeItem('coveredMusic');
-      setStems([]);
-      localStorage.removeItem('coverStems');
+      
+      audio.addEventListener('error', () => {
+        URL.revokeObjectURL(objectUrl);
+        // Don't block on duration check error
+        toast.info("File selected (duration check skipped)");
+      });
+    } catch (error) {
+      console.error('Audio validation error:', error);
+      // Don't block the upload, just log the error
+      toast.info("File selected");
     }
   };
 
@@ -474,7 +481,8 @@ export default function Cover() {
       }
     } catch (error) {
       console.error("[COVER] ❌ Manual check failed:", error);
-      toast.error(`Check failed: ${error.message}`, { id: 'manual-check' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Check failed: ${errorMessage}`, { id: 'manual-check' });
     }
   };
 
@@ -619,6 +627,7 @@ export default function Cover() {
 
   const toggleStemPlayback = (index: number) => {
     const stem = stems[index];
+    if (!stem) return;
     
     if (currentAudio) {
       currentAudio.pause();
@@ -669,7 +678,7 @@ export default function Cover() {
       title: item.title,
       customMode: item.settings.customMode,
       instrumental: item.settings.instrumental,
-      model: item.settings.model as "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5",
+      model: item.settings.model as "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V4_5ALL" | "V5",
       vocalGender: item.settings.vocalGender as "m" | "f",
       personaId: item.settings.personaId || "",
       negativeTags: item.settings.negativeTags || "",
@@ -876,22 +885,36 @@ export default function Cover() {
               <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
                 <input
                   type="file"
-                  accept="audio/*"
+                  accept="audio/*,.mp3,.wav,.flac,.m4a,.aac,.ogg"
                   onChange={handleFileSelect}
                   className="hidden"
                   id="audio-upload"
                   disabled={isUploading}
+                  capture={undefined}
                 />
-                <label htmlFor="audio-upload" className="cursor-pointer">
+                <label htmlFor="audio-upload" className="cursor-pointer block">
                   <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-sm font-medium mb-1">
-                    {uploadedFile ? uploadedFile.name : "Click to upload audio"}
+                    {uploadedFile ? uploadedFile.name : "Tap to upload audio"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    MP3, WAV, FLAC (max {coverSettings.model === 'V4_5ALL' ? '1 min' : '8 min'}, 50MB)
+                    MP3, WAV, FLAC, M4A (max {coverSettings.model === 'V4_5ALL' ? '1 min' : '8 min'}, 50MB)
                   </p>
                 </label>
               </div>
+
+              {/* Alternative button for mobile */}
+              {!uploadedFile && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => document.getElementById('audio-upload')?.click()}
+                  disabled={isUploading}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Choose Audio File
+                </Button>
+              )}
 
               {uploadedFile && !uploadedUrl && (
                 <Button 
