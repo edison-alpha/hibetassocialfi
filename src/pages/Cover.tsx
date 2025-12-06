@@ -52,7 +52,7 @@ export default function Cover() {
     title: "",
     customMode: true,
     instrumental: false,
-    model: "V3_5" as "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V5",
+    model: "V3_5" as "V3_5" | "V4" | "V4_5" | "V4_5PLUS" | "V4_5ALL" | "V5",
     vocalGender: "m" as "m" | "f",
     personaId: "",
     negativeTags: "",
@@ -119,7 +119,7 @@ export default function Cover() {
     }
   }, [stems]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("audio/")) {
@@ -130,6 +130,39 @@ export default function Cover() {
         toast.error("File size must be less than 50MB");
         return;
       }
+
+      // Check audio duration
+      const audio = document.createElement('audio');
+      const objectUrl = URL.createObjectURL(file);
+      audio.src = objectUrl;
+      
+      await new Promise<void>((resolve, reject) => {
+        audio.addEventListener('loadedmetadata', () => {
+          const durationInMinutes = audio.duration / 60;
+          
+          // V4_5ALL model has 1 minute limit, others have 8 minutes
+          const maxDuration = coverSettings.model === 'V4_5ALL' ? 1 : 8;
+          
+          if (durationInMinutes > maxDuration) {
+            toast.error(`Audio duration must not exceed ${maxDuration} minute(s) for ${coverSettings.model} model`);
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Duration exceeded'));
+            return;
+          }
+          
+          URL.revokeObjectURL(objectUrl);
+          resolve();
+        });
+        
+        audio.addEventListener('error', () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('Failed to load audio'));
+        });
+      }).catch((error) => {
+        console.error('Audio validation error:', error);
+        return;
+      });
+
       setUploadedFile(file);
       setUploadedUrl("");
       setCoveredMusic(null);
@@ -175,19 +208,51 @@ export default function Cover() {
       return;
     }
 
-    // Validation
+    // Validation based on documentation
     if (coverSettings.customMode) {
-      if (!coverSettings.style || !coverSettings.title) {
-        toast.error("Style and Title are required in Custom Mode");
+      // Custom Mode validation
+      if (!coverSettings.style || !coverSettings.title || !uploadedUrl) {
+        toast.error("Style, Title, and Upload URL are required in Custom Mode");
         return;
       }
+      
       if (!coverSettings.instrumental && !coverSettings.prompt) {
         toast.error("Prompt is required when not instrumental");
         return;
       }
+
+      // Validate prompt length by model
+      if (coverSettings.prompt) {
+        const promptMaxLength = coverSettings.model === 'V4' ? 3000 : 5000;
+        if (coverSettings.prompt.length > promptMaxLength) {
+          toast.error(`Prompt must not exceed ${promptMaxLength} characters for ${coverSettings.model} model`);
+          return;
+        }
+      }
+
+      // Validate style length by model
+      const styleMaxLength = coverSettings.model === 'V4' ? 200 : 1000;
+      if (coverSettings.style.length > styleMaxLength) {
+        toast.error(`Style must not exceed ${styleMaxLength} characters for ${coverSettings.model} model`);
+        return;
+      }
+
+      // Validate title length by model
+      const titleMaxLength = (coverSettings.model === 'V4' || coverSettings.model === 'V4_5ALL') ? 80 : 100;
+      if (coverSettings.title.length > titleMaxLength) {
+        toast.error(`Title must not exceed ${titleMaxLength} characters for ${coverSettings.model} model`);
+        return;
+      }
     } else {
-      if (!coverSettings.prompt) {
-        toast.error("Prompt is required");
+      // Non-custom Mode validation
+      if (!coverSettings.prompt || !uploadedUrl) {
+        toast.error("Prompt and Upload URL are required");
+        return;
+      }
+
+      // Prompt length limit: 500 characters for non-custom mode
+      if (coverSettings.prompt.length > 500) {
+        toast.error("Prompt must not exceed 500 characters in Non-custom Mode");
         return;
       }
     }
@@ -783,7 +848,7 @@ export default function Cover() {
           </p>
           <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
             <p className="text-sm text-blue-600 dark:text-blue-400">
-              ℹ️ Upload audio (max 2 minutes), generate a cover with new style, then separate into stems for remixing
+              ℹ️ Upload audio (max 8 minutes, or 1 minute for V4_5ALL), generate a cover with new style, then separate into stems for remixing
             </p>
           </div>
         </div>
@@ -793,7 +858,12 @@ export default function Cover() {
           <Card>
             <CardHeader>
               <CardTitle>1. Upload Audio</CardTitle>
-              <CardDescription>Upload your audio file (max 2 minutes, 50MB)</CardDescription>
+              <CardDescription>
+                Upload your audio file (max {coverSettings.model === 'V4_5ALL' ? '1 minute' : '8 minutes'}, 50MB)
+                {coverSettings.model === 'V4_5ALL' && (
+                  <span className="text-orange-500 font-semibold"> - V4_5ALL model requires audio ≤ 1 minute</span>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
@@ -811,7 +881,7 @@ export default function Cover() {
                     {uploadedFile ? uploadedFile.name : "Click to upload audio"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    MP3, WAV, FLAC (max 2 min, 50MB)
+                    MP3, WAV, FLAC (max {coverSettings.model === 'V4_5ALL' ? '1 min' : '8 min'}, 50MB)
                   </p>
                 </label>
               </div>
@@ -890,7 +960,12 @@ export default function Cover() {
               {coverSettings.customMode && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="title">
+                      Title * 
+                      <span className="text-xs text-muted-foreground ml-2">
+                        (max {(coverSettings.model === 'V4' || coverSettings.model === 'V4_5ALL') ? '80' : '100'} chars)
+                      </span>
+                    </Label>
                     <Input
                       id="title"
                       placeholder="My Cover Song"
@@ -898,11 +973,20 @@ export default function Cover() {
                       onChange={(e) =>
                         setCoverSettings({ ...coverSettings, title: e.target.value })
                       }
+                      maxLength={(coverSettings.model === 'V4' || coverSettings.model === 'V4_5ALL') ? 80 : 100}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      {coverSettings.title.length}/{(coverSettings.model === 'V4' || coverSettings.model === 'V4_5ALL') ? '80' : '100'} characters
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="style">Style *</Label>
+                    <Label htmlFor="style">
+                      Style * 
+                      <span className="text-xs text-muted-foreground ml-2">
+                        (max {coverSettings.model === 'V4' ? '200' : '1000'} chars)
+                      </span>
+                    </Label>
                     <Input
                       id="style"
                       placeholder="Jazz, Classical, Electronic..."
@@ -910,7 +994,11 @@ export default function Cover() {
                       onChange={(e) =>
                         setCoverSettings({ ...coverSettings, style: e.target.value })
                       }
+                      maxLength={coverSettings.model === 'V4' ? 200 : 1000}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      {coverSettings.style.length}/{coverSettings.model === 'V4' ? '200' : '1000'} characters
+                    </p>
                   </div>
                 </>
               )}
@@ -919,6 +1007,9 @@ export default function Cover() {
                 <div className="space-y-2">
                   <Label htmlFor="prompt">
                     {coverSettings.customMode ? "Lyrics *" : "Prompt *"}
+                    <span className="text-xs text-muted-foreground ml-2">
+                      (max {coverSettings.customMode ? (coverSettings.model === 'V4' ? '3000' : '5000') : '500'} chars)
+                    </span>
                   </Label>
                   <Textarea
                     id="prompt"
@@ -932,7 +1023,11 @@ export default function Cover() {
                       setCoverSettings({ ...coverSettings, prompt: e.target.value })
                     }
                     rows={4}
+                    maxLength={coverSettings.customMode ? (coverSettings.model === 'V4' ? 3000 : 5000) : 500}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {coverSettings.prompt.length}/{coverSettings.customMode ? (coverSettings.model === 'V4' ? '3000' : '5000') : '500'} characters
+                  </p>
                 </div>
               )}
 
@@ -953,6 +1048,7 @@ export default function Cover() {
                       <SelectItem value="V4">V4</SelectItem>
                       <SelectItem value="V4_5">V4.5</SelectItem>
                       <SelectItem value="V4_5PLUS">V4.5 Plus</SelectItem>
+                      <SelectItem value="V4_5ALL">V4.5 All (⚠️ 1 min audio limit)</SelectItem>
                       <SelectItem value="V5">V5</SelectItem>
                     </SelectContent>
                   </Select>
